@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// FILE: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- STRUKTUR DATABASE ---
+
+// 1. Enum: Pilihan Kategori (Agar user tidak asal ketik)
+enum Category {
+  ENTERTAINMENT // Netflix, Spotify, Game
+  EDUCATION     // Ruangguru, Udemy
+  TOOLS         // Adobe, Canva, Office 365
+  UTILITIES     // Listrik, Air, Internet
+  OTHER
+}
+
+// 2. Enum: Siklus Pembayaran
+enum Cycle {
+  MONTHLY
+  YEARLY
+}
+
+// 3. Model Utama
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  name        String    // Nama Layanan
+  price       Int       // Harga per tagihan
+  
+  // Menggunakan Enum agar data terstruktur
+  category    Category  @default(OTHER)
+  cycle       Cycle     @default(MONTHLY)
+  
+  startDate   DateTime  @default(now()) // Kapan mulai langganan
+  nextPayment DateTime  // Kapan harus bayar lagi
+  
+  isActive    Boolean   @default(true)
+  notes       String?   // Catatan opsional (bisa kosong)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
