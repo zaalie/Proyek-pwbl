@@ -1,7 +1,7 @@
-import { success } from "@/lib/response"
+import { ok } from "@/lib/response"
 
 export async function GET() {
-  return success({
-    message: "Authentication API ready",
+  return ok({
+    message: "Auth API ready",
   })
 }
