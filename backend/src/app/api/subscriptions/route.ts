@@ -1,35 +1,47 @@
 import { prisma } from "@/lib/prisma"
-import { success, error } from "@/lib/response"
+import {
+  ok,
+  created,
+  badRequest,
+  serverError,
+} from "@/lib/response"
 
 export async function GET() {
-  const subscriptions = await prisma.subscription.findMany({
-    orderBy: {
-      nextPayment: "asc",
-    },
-  })
+  try {
+    const data = await prisma.subscription.findMany({
+      orderBy: { nextPayment: "asc" },
+    })
 
-  return success(subscriptions)
+    return ok(data)
+  } catch {
+    return serverError()
+  }
 }
 
 export async function POST(req: Request) {
-  const body = await req.json()
+  try {
+    const body = await req.json()
+    const { name, price, category, cycle, nextPayment, notes } = body
 
-  const { name, price, category, cycle, nextPayment, notes } = body
+    if (!name || !price || !nextPayment) {
+      return badRequest(
+        "name, price, dan nextPayment wajib diisi"
+      )
+    }
 
-  if (!name || !price || !nextPayment) {
-    return error("name, price, dan nextPayment wajib diisi")
+    const subscription = await prisma.subscription.create({
+      data: {
+        name,
+        price: Number(price),
+        category,
+        cycle,
+        nextPayment: new Date(nextPayment),
+        notes,
+      },
+    })
+
+    return created(subscription)
+  } catch {
+    return serverError()
   }
-
-  const subscription = await prisma.subscription.create({
-    data: {
-      name,
-      price: Number(price),
-      category,
-      cycle,
-      nextPayment: new Date(nextPayment),
-      notes,
-    },
-  })
-
-  return success(subscription, 201)
 }
